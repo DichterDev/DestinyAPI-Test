@@ -42,7 +42,7 @@ function extractZIPFile(filePath, filename) {
     });
 }
 
-export async function downloadSQLITEDatabase() {
+export default async function downloadSQLITEDatabase() {
     let url = await getSQLITEManifestURL();
     let filename = 'DestinyDefinitions.zip';
 
