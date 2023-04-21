@@ -1,7 +1,7 @@
-const fs = require('fs')
-const JSZip = require('jszip');
-const https = require('https');
-const axios = require('axios');
+import fs from 'fs';
+import axios from 'axios';
+import https from 'https';
+import JSZip from 'jszip';
 
 const c_requiredDefinitions = [
     'DestinyClassDefinition', 
@@ -20,20 +20,20 @@ const config = {
 }
 
 async function getSQLITEManifestURL() {
-    let data = (await axios.get(c_manifest_url, config)).data['Response'];
-    let sqlite_url = 'https://www.bungie.net' + `${data['mobileWorldContentPaths']['en']}`
+    let data: any = (await axios.get(c_manifest_url, config)).data['Response'];
+    let sqlite_url: string = 'https://www.bungie.net' + `${data['mobileWorldContentPaths']['en']}`
     return sqlite_url;
 }
 
-function extractZIPFile(filePath, filename) {
+function extractZIPFile(filePath: string) {
     // https://stackoverflow.com/a/39324475
     fs.readFile(filePath, function(err, data) {
         if (!err) {
             var zip = new JSZip();
             zip.loadAsync(data).then(function(contents) {
                 Object.keys(contents.files).forEach(function(filename) {
-                    zip.file(filename).async('nodebuffer').then(function(content) {
-                        let dest = './definitions/DestinyDefinitions.sqlite3';
+                    zip.file(filename)?.async('nodebuffer').then(function(content) {
+                        let dest: string = './definitions/DestinyDefinitions.sqlite3';
                         fs.writeFileSync(dest, content);
                     });
                 });
@@ -42,16 +42,16 @@ function extractZIPFile(filePath, filename) {
     });
 }
 
-export default async function downloadSQLITEDatabase() {
-    let url = await getSQLITEManifestURL();
-    let filename = 'DestinyDefinitions.zip';
+async function downloadSQLITEDatabase() {
+    let url: string = await getSQLITEManifestURL();
+    let filename: string = 'DestinyDefinitions.zip';
 
     let file = fs.createWriteStream(filename);
-    let path = file.path;
+    let path = file.path.toString();
 
     console.log(url);
 
-    let req = new Promise((resolve, reject) => {
+    let req = new Promise<void>((resolve, reject) => {
         https.get(url, function(response) {
             response.pipe(file);
           
@@ -61,20 +61,21 @@ export default async function downloadSQLITEDatabase() {
               resolve();
             });
           }).on('error', function(err) {
-            fs.unlink(filename);
+            fs.unlink(filename, () => {});
             console.error(`Error downloading ${url}: ${err.message}`);
             reject();
         });
     });
 
     await req;
+    
 
     // Extract .zip file
 
-    extractZIPFile(path, filename);
+    extractZIPFile(path);
 
 };
 
-downloadSQLITEDatabase()
-// download or get Definitions from web
-// possible hardware limitations for web
+downloadSQLITEDatabase();
+
+export default downloadSQLITEDatabase;
