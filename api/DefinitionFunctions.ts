@@ -23,7 +23,7 @@ interface Perk {
     icon: string
 }
 
-let db = new Database('D:\\Github\\Destiny\\DestinyAPI-Test\\definitions\\DestinyDefinitions.sqlite3');
+let db = new Database('./definitions/DestinyDefinitions.sqlite3');
 
 let base_url = "https://bungie.net";
 
